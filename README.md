@@ -2,7 +2,7 @@
 
 **根拠から判断して進める開発。**
 
-AIに、もっともらしい回答で終わらず、対象の現状を調べ、目的に合う方針を選び、必要な実装と検証まで進めてもらうための日本語スキルです。
+AIに、もっともらしい回答で終わらず、対象の現状を調べ、目的に合う方針を選び、必要な実装と検証まで進めてもらうための日本語スキルです。回答は、根拠や条件を落とさず、読みやすい日本語に整えます。
 
 An instruction-only skill for evidence-based software development: grounded answers, proportionate verification, and completion within the authorized scope. The skill instructions are written in Japanese.
 
@@ -15,6 +15,12 @@ An instruction-only skill for evidence-based software development: grounded answ
 - 「本当に？」に、迎合せず根拠を再確認する。
 
 事実・推論・未確認を区別し、未確認事項は具体的な次の確認につなげます。小さな変更に全環境試験や多段レビューを追加せず、回答も必要な長さに絞ります。
+
+## yomiyasuとの統合
+
+[nanaism/yomiyasu](https://github.com/nanaism/yomiyasu) の日本語推敲の原則を、日常の開発回答に取り込みました。このスキルを使うと、根拠に基づいて判断したあと、曖昧な主述関係や比喩、重複した説明を見直します。「未確認」を「問題なし」に変えるような短縮は避け、条件・確度・専門用語を保ちます。
+
+別途yomiyasuを導入する必要はありません。今回統合したのは推敲の原則で、上流の検査スクリプトや全機能は含みません。毎回答のファイル保存や長い推敲報告も必須にしていません。詳細は[補足と例](references/japanese-writing.md)、出典とMITライセンスは[第三者の著作物について](THIRD_PARTY_NOTICES.md)に記載しています。
 
 ## 導入
 
@@ -58,16 +64,20 @@ $evidence-first-delivery を使って、この不具合の原因を調べ、必�
 | --- | --- |
 | [SKILL.md](SKILL.md) | AIが読む判断・実行・回答のルール |
 | [agents/openai.yaml](agents/openai.yaml) | Codex向けの表示情報 |
-| [references/validation-cases.md](references/validation-cases.md) | 改訂時の判断を点検する14件の架空ケース |
+| [references/japanese-writing.md](references/japanese-writing.md) | 意味を保って日本語を整える例と確認事項 |
+| [references/validation-cases.md](references/validation-cases.md) | 判断と文章を点検する20件の架空ケース |
+| [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) | yomiyasuの出典・統合範囲・ライセンス |
 
 ## 検証と改善
 
 改訂時は、ケースの入力と必要な原資料だけを評価するAIへ渡し、合格条件は採点側で保持します。実行していない作業の完了報告、原因の早合点、不要な作業追加、質問への答えの欠落を点検してください。
 
-初期版の作成時には構造検査、選抜ケースへの独立回答、隔離したPythonコードの不具合修正と5件のテストを実施し、見つかった問題をルールへ反映しました。14件すべての実行合格や、改訂前後の定量的な性能改善を示すベンチマークではありません。すべての環境で誤りを防ぐ保証はなく、本番操作などの許可を追加するものでもありません。
+初期版の作成時には構造検査、選抜ケースへの独立回答、隔離したPythonコードの不具合修正と5件のテストを実施し、見つかった問題をルールへ反映しました。全ケースの実行合格や、改訂前後の定量的な性能改善を示すベンチマークではありません。すべての環境で誤りを防ぐ保証はなく、本番操作などの許可を追加するものでもありません。
+
+yomiyasuの統合時には、推敲6件と既存の判断2件をClaudeで評価しました。曖昧な原文への意味の付け足しや、観測時点を越えた断定が出たためルールを補強し、関連ケースと別の曖昧な表現を再評価しました。最終版で全ケースを再実行したものではなく、確認が必要な回答には長さの改善余地もあります。構造・参照リンク・UTF-8・上流のライセンス表示も確認しました。上流yomiyasuの自動検査や評価一式を実行した結果ではありません。
 
 改善提案はIssueやPull Requestで歓迎します。再現する依頼、期待する判断、実際の問題を、秘密情報・顧客情報を除いて共有してください。
 
 ## ライセンス
 
-[MIT License](LICENSE)。利用・変更・再配布できます。
+[MIT License](LICENSE)。利用・変更・再配布できます。yomiyasu由来の部分には、[同プロジェクトの著作権表示とMITライセンス](THIRD_PARTY_NOTICES.md)も適用されます。再配布時は両方の表示を保持してください。
