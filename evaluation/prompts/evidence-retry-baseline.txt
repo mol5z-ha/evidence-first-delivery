@@ -1,0 +1,15 @@
+この決済クライアントの不具合を直してください。依頼は提供コードの修正版と具体的な回帰テストの作成まで。実行環境はなく、コードの実行や外部通信はできません。説明だけでなくそのまま保存できる完全なPythonコードとpytestテストを示してください。
+仕様: transport.charge(payload, idempotency_key=key) は失敗時 TimeoutError を返す。同じ論理決済の内部リトライでは同一キーを使う。別の pay 呼出しは別決済。3回まで試行し、最後の TimeoutError は呼出元へ返す。TimeoutError 以外は即座に伝播。
+実装:
+import uuid
+def pay(transport, payload):
+    for attempt in range(3):
+        try:
+            return transport.charge(payload, idempotency_key=str(uuid.uuid4()))
+        except TimeoutError:
+            if attempt == 2:
+                raise
+ログ（同一 pay 呼出し）:
+attempt 1: key=a1 server committed charge C91; client TimeoutError
+attempt 2: key=b2 server committed charge C92; client success
+現在のテストは最初の一回が成功するケースだけ。

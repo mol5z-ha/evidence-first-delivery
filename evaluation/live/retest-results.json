@@ -1,0 +1,380 @@
+[
+  {
+    "mode": "fixture",
+    "passed": 6,
+    "total": 9,
+    "cases": [
+      {
+        "case": "empty_terminal",
+        "passed": true,
+        "expected": [],
+        "actual": [],
+        "calls": [
+          null
+        ]
+      },
+      {
+        "case": "single",
+        "passed": true,
+        "expected": [
+          1,
+          2
+        ],
+        "actual": [
+          1,
+          2
+        ],
+        "calls": [
+          null
+        ]
+      },
+      {
+        "case": "ordinary",
+        "passed": true,
+        "expected": [
+          1,
+          2
+        ],
+        "actual": [
+          1,
+          2
+        ],
+        "calls": [
+          null,
+          "b"
+        ]
+      },
+      {
+        "case": "empty_middle",
+        "passed": false,
+        "expected": [
+          1,
+          2
+        ],
+        "actual": [
+          1
+        ],
+        "calls": [
+          null,
+          "b"
+        ]
+      },
+      {
+        "case": "empty_first",
+        "passed": false,
+        "expected": [
+          2
+        ],
+        "actual": [],
+        "calls": [
+          null
+        ]
+      },
+      {
+        "case": "consecutive_empty",
+        "passed": false,
+        "expected": [
+          2
+        ],
+        "actual": [],
+        "calls": [
+          null
+        ]
+      },
+      {
+        "case": "opaque_zero_cursor",
+        "passed": true,
+        "expected": [
+          1,
+          2
+        ],
+        "actual": [
+          1,
+          2
+        ],
+        "calls": [
+          null,
+          0
+        ]
+      },
+      {
+        "case": "duplicates_preserved",
+        "passed": true,
+        "expected": [
+          1,
+          1
+        ],
+        "actual": [
+          1,
+          1
+        ],
+        "calls": [
+          null,
+          "b"
+        ]
+      },
+      {
+        "case": "upstream_exception",
+        "passed": true
+      }
+    ]
+  },
+  {
+    "mode": "baseline",
+    "passed": 9,
+    "total": 9,
+    "cases": [
+      {
+        "case": "empty_terminal",
+        "passed": true,
+        "expected": [],
+        "actual": [],
+        "calls": [
+          null
+        ]
+      },
+      {
+        "case": "single",
+        "passed": true,
+        "expected": [
+          1,
+          2
+        ],
+        "actual": [
+          1,
+          2
+        ],
+        "calls": [
+          null
+        ]
+      },
+      {
+        "case": "ordinary",
+        "passed": true,
+        "expected": [
+          1,
+          2
+        ],
+        "actual": [
+          1,
+          2
+        ],
+        "calls": [
+          null,
+          "b"
+        ]
+      },
+      {
+        "case": "empty_middle",
+        "passed": true,
+        "expected": [
+          1,
+          2
+        ],
+        "actual": [
+          1,
+          2
+        ],
+        "calls": [
+          null,
+          "b",
+          "c"
+        ]
+      },
+      {
+        "case": "empty_first",
+        "passed": true,
+        "expected": [
+          2
+        ],
+        "actual": [
+          2
+        ],
+        "calls": [
+          null,
+          "b"
+        ]
+      },
+      {
+        "case": "consecutive_empty",
+        "passed": true,
+        "expected": [
+          2
+        ],
+        "actual": [
+          2
+        ],
+        "calls": [
+          null,
+          "b",
+          "c"
+        ]
+      },
+      {
+        "case": "opaque_zero_cursor",
+        "passed": true,
+        "expected": [
+          1,
+          2
+        ],
+        "actual": [
+          1,
+          2
+        ],
+        "calls": [
+          null,
+          0
+        ]
+      },
+      {
+        "case": "duplicates_preserved",
+        "passed": true,
+        "expected": [
+          1,
+          1
+        ],
+        "actual": [
+          1,
+          1
+        ],
+        "calls": [
+          null,
+          "b"
+        ]
+      },
+      {
+        "case": "upstream_exception",
+        "passed": true
+      }
+    ]
+  },
+  {
+    "mode": "revised",
+    "passed": 9,
+    "total": 9,
+    "cases": [
+      {
+        "case": "empty_terminal",
+        "passed": true,
+        "expected": [],
+        "actual": [],
+        "calls": [
+          null
+        ]
+      },
+      {
+        "case": "single",
+        "passed": true,
+        "expected": [
+          1,
+          2
+        ],
+        "actual": [
+          1,
+          2
+        ],
+        "calls": [
+          null
+        ]
+      },
+      {
+        "case": "ordinary",
+        "passed": true,
+        "expected": [
+          1,
+          2
+        ],
+        "actual": [
+          1,
+          2
+        ],
+        "calls": [
+          null,
+          "b"
+        ]
+      },
+      {
+        "case": "empty_middle",
+        "passed": true,
+        "expected": [
+          1,
+          2
+        ],
+        "actual": [
+          1,
+          2
+        ],
+        "calls": [
+          null,
+          "b",
+          "c"
+        ]
+      },
+      {
+        "case": "empty_first",
+        "passed": true,
+        "expected": [
+          2
+        ],
+        "actual": [
+          2
+        ],
+        "calls": [
+          null,
+          "b"
+        ]
+      },
+      {
+        "case": "consecutive_empty",
+        "passed": true,
+        "expected": [
+          2
+        ],
+        "actual": [
+          2
+        ],
+        "calls": [
+          null,
+          "b",
+          "c"
+        ]
+      },
+      {
+        "case": "opaque_zero_cursor",
+        "passed": true,
+        "expected": [
+          1,
+          2
+        ],
+        "actual": [
+          1,
+          2
+        ],
+        "calls": [
+          null,
+          0
+        ]
+      },
+      {
+        "case": "duplicates_preserved",
+        "passed": true,
+        "expected": [
+          1,
+          1
+        ],
+        "actual": [
+          1,
+          1
+        ],
+        "calls": [
+          null,
+          "b"
+        ]
+      },
+      {
+        "case": "upstream_exception",
+        "passed": true
+      }
+    ]
+  }
+]

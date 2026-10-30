@@ -1,0 +1,11 @@
+--- fixture/exporter.py
++++ revised/exporter.py
+@@ -2,7 +2,7 @@
+     """Return items in API order. None is the only terminal next_cursor."""
+     result = []
+     page = fetch_page(None)
+-    while page["items"]:
++    while True:
+         result.extend(page["items"])
+         cursor = page["next_cursor"]
+         if cursor is None:
