@@ -4,7 +4,22 @@
 
 AIに、もっともらしい回答で終わらず、対象の現状を調べ、目的に合う方針を選び、必要な実装と検証まで進めてもらうための日本語スキルです。回答は、根拠や条件を落とさず、読みやすい日本語に整えます。
 
-An instruction-only skill for evidence-based software development: grounded answers, proportionate verification, and completion within the authorized scope. The skill instructions are written in Japanese.
+An instruction-only skill for evidence-based software development: discriminating experiments, before/after regression checks, and completion within the authorized scope. The skill instructions are written in Japanese.
+
+## 読ませると何が変わるか
+
+曖昧な「根拠を確認して」を、実行できる調査に変えるための手順です。
+
+1. 依頼を、入力・期待結果・守るべき既存動作にする。
+2. 原因候補ごとに予測を立て、候補を区別できる最小の観測・実験を選ぶ。
+3. 修正前に失敗を捉え、同じ確認を修正後に通す。例外の消失だけでなく結果・状態・副作用も見る。
+4. 追試する手順と実測結果、実際の反映先を渡す。
+
+例えば「新版では保存に失敗、旧版では成功」という報告で回線も違うなら、版だけを原因にしません。同じ版で回線を変える比較、同じ回線で版を変える比較を選び、結果に応じて仮説を更新します。修正依頼ならその結果から実装・回帰確認へ進みます。
+
+本体は短い入口とし、難しい診断には[実験カードと比較例](references/diagnostic-experiments.md)、修正の検証には[受入確認の手順](references/delivery-proof.md)を参照します。小さな修正にこの全工程や別の報告ファイルを義務付けません。
+
+このスキルは、AIがもともと持つ能力を新しく獲得させるものではありません。調査や検証の抜けを減らす設計です。効果はモデル・課題・使える道具に依存し、「普通のAIではできない」「必ず改善する」とは主張していません。
 
 ## 何に使うか
 
@@ -63,14 +78,25 @@ $evidence-first-delivery を使って、この不具合の原因を調べ、必�
 | ファイル | 内容 |
 | --- | --- |
 | [SKILL.md](SKILL.md) | AIが読む判断・実行・回答のルール |
+| [references/diagnostic-experiments.md](references/diagnostic-experiments.md) | 相関の照合、仮説を分ける実験カード、交絡を避ける比較例 |
+| [references/delivery-proof.md](references/delivery-proof.md) | 実装と独立した期待結果、変更前後の回帰確認、副作用の観測 |
+| [references/claim-audit.md](references/claim-audit.md) | 下書きの着手・完了・原因・範囲を原資料に照合する別工程 |
 | [agents/openai.yaml](agents/openai.yaml) | Codex向けの表示情報 |
 | [references/japanese-writing.md](references/japanese-writing.md) | 意味を保って日本語を整える例と確認事項 |
-| [references/validation-cases.md](references/validation-cases.md) | 判断と文章を点検する20件の架空ケース |
+| [references/validation-cases.md](references/validation-cases.md) | 判断と文章を点検する架空ケースと採点条件（評価者用） |
 | [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) | yomiyasuの出典・統合範囲・ライセンス |
 
 ## 検証と改善
 
-改訂時は、ケースの入力と必要な原資料だけを評価するAIへ渡し、合格条件は採点側で保持します。実行していない作業の完了報告、原因の早合点、不要な作業追加、質問への答えの欠落を点検してください。
+2026-10-30にClaudeで比較しました。決済修正は通常指示・旧版・改訂版とも独立契約テスト5件に合格し、正しさの優位性は示せませんでした。文案の架空の着手報告は改訂後も再発したため、下書きを原資料へ照合する工程を追加しています。独立した別プロセスでの照合2件では主要な誤主張を訂正できました。同じAI内だけの照合効果は未測定です。[実入力・失敗を含む比較結果](evaluation/final-summary.md)を公開しています。
+
+補助的な[実行試験](evaluation/live/assessment.md)では、Claudeに実際にコードとテストを変更させました。通常指示・改訂版とも変更前の失敗と変更後の成功を実行し、外部の9件の契約テストに合格しました。この1案件でも成功率の上積みは未実証です。文章評価とはモデル・道具が異なるため結果を合算しません。
+
+改訂時は、ケースの入力と必要な原資料だけを評価するAIへ渡し、合格条件は採点側で保持します。評価対象の環境には本体・必要な参照資料・入力だけをコピーし、`references/validation-cases.md` や採点ファイルへアクセスできない状態にします。ファイルを見ないよう指示するだけでは答えの漏洩を防げません。
+
+同じモデル・道具・課題でスキルなし／ありを比較します。正しさだけでなく、実際の成果物、未実行の完了・着手報告、不要な確認・操作、所要時間を記録します。出力の長さやルールへの言及回数を品質点にしません。修正に使ったケースは開発用となるため、新しいケースでも確認します。少数例の成功を実案件全体の改善率へ広げないでください。
+
+今回の改訂は、本体の反復を減らし、調査と修正の実行手順を補うものです。構造検査や文章レビューだけで、実際の成果が上がったとは判定しません。以下の検証履歴は過去の版についての記録です。
 
 初期版の作成時には構造検査、選抜ケースへの独立回答、隔離したPythonコードの不具合修正と5件のテストを実施し、見つかった問題をルールへ反映しました。全ケースの実行合格や、改訂前後の定量的な性能改善を示すベンチマークではありません。すべての環境で誤りを防ぐ保証はなく、本番操作などの許可を追加するものでもありません。
 

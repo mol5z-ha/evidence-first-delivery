@@ -1,0 +1,29 @@
+{
+  "method": "Fresh Claude processes, tools disabled, supplied source plus faulty draft plus claim-audit reference. No answer key. Local harness filename suffix baseline only suppressed automatic context injection; this export correctly labels the audit condition. Two calls, not blinded and not repeated. No neutral second-pass control was run, so benefit cannot be isolated to the audit skill versus another review pass.",
+  "runs": [
+    {
+      "id": "audit-release-stage2",
+      "workflow": "independent second-stage claim audit; NOT a baseline or one-pass skill run",
+      "prompt_sha256": "4af3acf6da077e6e3fdf413b09071e03c664aaf8fe58e4ac7b32b0db907f0f61",
+      "prompt_characters": 1992,
+      "model": [
+        "claude-fable-5-1"
+      ],
+      "elapsed_seconds": 36.08,
+      "result": "照合結果に基づく修正版と、修正理由です。\n\n**修正した回答案**\n\n**結論：言えません。** 根拠は三点です。\n\n- 担当メモが「解消」と確認したのは候補Bの検索画面で、利用者が失敗したのは注文作成です。対象の操作が違います。\n- 候補Bは未公開で、本番配布は artifact A のみです。利用者が使っていたのも artifact A なので、更新先がなく、「古い版」とも言えません。\n- 「サーバーは成功」の根拠にされた request_id=r79 は、利用者の r78 とは別の要求です。しかも本文は ok:false かつ quota_exceeded のエラー応答で、HTTP 200 でも成功ではありません。\n\n**取引先向け文案（未送信）**\n\n```text\nご報告いただいた注文作成時のタイムアウト（request_id: r78）について、現時点では原因を特定できておらず、アプリの更新で解消するとは判断しておりません。\nサーバー側の記録を確認のうえ、改めてご連絡いたします。\n```\n\n**今行うべき確認を一つ**\n\nサーバーログで request_id=r78 を検索し、受信の有無、HTTPステータス、本文を確認します。\n\n- 記録がなければ、要求がサーバーに届く前か、応答を受け取る前に端末側で切れた可能性が残ります。\n- 記録があり本文がエラーなら、その内容が原因候補になります。別の利用者が同じ版で注文作成に成功している点とも矛盾しません。\n\nいずれの結果でも、候補Bの変更は検索画面の空配列処理だけで、注文作成の失敗を直す根拠はありません。担当者案の「最新版へ更新してください」は送るべきではありません。\n\n**修正理由**\n\n- 「現在サーバー側の記録を確認しています」を削除しました。原資料に r78 の調査に着手した記録はなく、着手済みの主張になっていました。\n- 取引先文案の「更新のご案内は確認後に改めてご連絡します」と「確認結果が出次第、ご連絡いたします」を一文にまとめました。確約が重複し、依頼の「短い文案」から外れていました。\n- 「全利用者が artifact A を使っており」を「本番配布は artifact A のみ」と「利用者が使っていたのは artifact A」に直しました。観測したのは配布記録と二名の利用者だけで、全利用者には広げられません。\n- 「この利用者固有の原因になります」を「原因候補になります」に弱めました。r79 がどの利用者の要求かは不明で、quota_exceeded がこの利用者に当てはまるかは未確認です。\n- 「業務エラー」を「ok:false かつ quota_exceeded のエラー応答」に改めました。原資料に記載された本文の事実だけを述べる形にしています。\n- 候補Bの変更内容が検索画面の空配列処理だけである点を結びに明記しました。「直す根拠がない」という判断の裏付けを原資料の一文に対応させるためです。",
+      "grading": "Major unsupported activity/scope/cause/guarantee assertions removed in this one sample; no universal prevention or all-claims-correct claim."
+    },
+    {
+      "id": "audit-new-holdout-stage2",
+      "workflow": "independent second-stage claim audit; NOT a baseline or one-pass skill run",
+      "prompt_sha256": "8e9bd0122083f647b1092f749160755ed7d6d6d9a24a6199156986742b50e2a2",
+      "prompt_characters": 964,
+      "model": [
+        "claude-fable-5-1"
+      ],
+      "elapsed_seconds": 24.62,
+      "result": "本文（送付可能な文案）:\n\n```text\n住所CSVの一部で郵便番号が空欄になっているとのご報告をいただき、ご迷惑をおかけしております。\nいただいた入力ファイルは保存しており、担当者が翌営業日に確認する予定です。\n原因、影響範囲、復旧時期は現時点では未確認のため、確認後に改めてご連絡いたします。\n```\n\n修正理由:\n\n- **「調査の結果、判明しました」を削除。** 原資料では原因は未確認で、担当者の確認は翌営業日の予定です。調査は未着手です。\n- **「旧バージョンに起因」を削除。** 原因を示す資料がありません。\n- **「すべてのお客様のデータを確認済み」を削除。** 報告は住所CSVの一部に限られ、影響人数は未確認です。対象を広げる根拠がありません。\n- **「明日のv4更新で必ず復旧」を削除。** 公開中はv3で、v4は社内試験のみです。復旧日も未確認で、確約はできません。\n- **「確認後にご連絡」の一文は追加した判断です。** 原資料に明記はないため、連絡の約束が不要であれば削ってください。",
+      "grading": "Major unsupported activity/scope/cause/guarantee assertions removed in this one sample; no universal prevention or all-claims-correct claim."
+    }
+  ]
+}

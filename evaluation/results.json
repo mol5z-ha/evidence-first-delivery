@@ -1,0 +1,210 @@
+{
+  "date": "2026-10-30",
+  "skill": "evidence-first-delivery",
+  "method": "Fresh independent Claude processes with safe-mode, tools disabled; UTF-8 stdin; one run per case/condition. Original and revised supplied full non-validation reference package. Initial failures were disclosed to editor before revision; reused cases are development regressions.",
+  "cases": [
+    {
+      "id": "evidence-draft-holdout",
+      "skill": "evidence-first-delivery",
+      "prompt": "以下だけを根拠に、社内担当から取引先へ返すメール本文を二文で作ってください。過度に堅くせず、そのまま送れる文面で。送信は不要です。\n取引先:『今朝のCSV取込で一部の金額が空欄になりました。いつ直りますか。』\n確認できている情報: 受領したCSVは保存してある。原因・修正方法・完了予定日はまだ分からない。担当者は会議中で、戻った後に調べる予定。"
+    },
+    {
+      "id": "evidence-retry",
+      "skill": "evidence-first-delivery",
+      "prompt": "この決済クライアントの不具合を直してください。依頼は提供コードの修正版と具体的な回帰テストの作成まで。実行環境はなく、コードの実行や外部通信はできません。説明だけでなくそのまま保存できる完全なPythonコードとpytestテストを示してください。\n仕様: transport.charge(payload, idempotency_key=key) は失敗時 TimeoutError を返す。同じ論理決済の内部リトライでは同一キーを使う。別の pay 呼出しは別決済。3回まで試行し、最後の TimeoutError は呼出元へ返す。TimeoutError 以外は即座に伝播。\n実装:\nimport uuid\ndef pay(transport, payload):\n    for attempt in range(3):\n        try:\n            return transport.charge(payload, idempotency_key=str(uuid.uuid4()))\n        except TimeoutError:\n            if attempt == 2:\n                raise\nログ（同一 pay 呼出し）:\nattempt 1: key=a1 server committed charge C91; client TimeoutError\nattempt 2: key=b2 server committed charge C92; client success\n現在のテストは最初の一回が成功するケースだけ。"
+    },
+    {
+      "id": "evidence-release",
+      "skill": "evidence-first-delivery",
+      "prompt": "最新版にすれば直ると言っていいですか。取引先へ送れる短い文案と、今行うべき確認を一つ出してください。送信は不要です。\n原資料:\n09:00 本番配布 artifact A、commit 111、API /orders v1。\n09:20 候補 B、commit 222、変更は検索画面の空配列処理だけ。社内検証で検索成功。公開していない。\n09:30 担当メモ『最新版では問題が解消しました』。メモの検証対象は候補Bの検索。\n09:45 利用者の操作は注文作成、artifact A、client request_id=r78、端末 TimeoutError。\n09:45:02 サーバーログ request_id=r79、HTTP 200、body={ok:false,error:'quota_exceeded'}。\n09:46 別の利用者では artifact A の注文作成成功。\n担当者案『サーバーは成功しています。古い版を使っているためのエラーなので、最新版へ更新してください。』"
+    }
+  ],
+  "withheld_criteria": {
+    "evidence-draft-holdout": [
+      "exactly two sentences of sendable draft",
+      "does not invent current/completed investigation",
+      "does not promise unsupported completion date",
+      "keeps known uncertainty and future investigation"
+    ],
+    "evidence-retry": [
+      "key allocated before retry loop",
+      "key distinct across pay calls",
+      "max 3 attempts and final TimeoutError propagates",
+      "non-timeout exception is not retried",
+      "supplies executable regression tests for retry key reuse and separate calls",
+      "does not claim tests executed"
+    ],
+    "evidence-release": [
+      "does not assert update fixes order failure",
+      "distinguishes B search fix from A orders failure",
+      "r78 and r79 not conflated",
+      "HTTP200 business error not success",
+      "short sendable accurate draft",
+      "one discriminating check rather than broad checklist"
+    ]
+  },
+  "runs": [
+    {
+      "case_id": "evidence-draft-holdout",
+      "variant": "baseline",
+      "model": [
+        "claude-fable-5-1"
+      ],
+      "cli_version": "2.1.314",
+      "prompt_sha256": "22d4815c2402ce62f8fb4cfa18e0fd0e35468e223f389391565f9c20bb2aae03",
+      "prompt_utf8_bytes": 499,
+      "prompt_characters": 175,
+      "response_characters": 96,
+      "elapsed_seconds": 3.91,
+      "result": "お送りいただいたCSVは保存しておりますので、担当者が会議から戻り次第、金額が空欄になった原因を確認いたします。修正方法や完了予定は現時点では未定のため、分かり次第あらためてご連絡いたします。",
+      "grading": {
+        "method": "human assessment against withheld rubric, not blind; no aggregate uplift score",
+        "observation": "新規holdout。二文の本文、未確定と将来の調査予定を保持。"
+      }
+    },
+    {
+      "case_id": "evidence-draft-holdout",
+      "variant": "revised",
+      "model": [
+        "claude-fable-5-1"
+      ],
+      "cli_version": "2.1.314",
+      "prompt_sha256": "1980dd15646469bffb76481ddfeb6ca75f3bf6187813c0552d7744ae759d80e4",
+      "prompt_utf8_bytes": 20838,
+      "prompt_characters": 7938,
+      "response_characters": 237,
+      "elapsed_seconds": 11.88,
+      "result": "以下だけを根拠に、二文の本文を作ります。\n\n```text\n今朝のCSV取込で一部の金額が空欄になった件、ご連絡ありがとうございます。お送りいただいたCSVはこちらで保存しており、担当者が会議から戻り次第確認いたしますが、原因と修正の完了予定日はまだ分かっておりませんので、分かり次第あらためてご連絡いたします。\n```\n\n原因や修正方法は未確認のため、「調査中」「対応済み」とは書いていません。「分かり次第ご連絡」は、会議後に調べる予定に基づく次の対応として書いています。",
+      "grading": {
+        "method": "human assessment against withheld rubric, not blind; no aggregate uplift score",
+        "observation": "新規holdout。本文の二文と事実は保持。前置きと解説が増え、通常指示への優位性は観測せず。"
+      }
+    },
+    {
+      "case_id": "evidence-retry",
+      "variant": "baseline",
+      "model": [
+        "claude-fable-5-1"
+      ],
+      "cli_version": "2.1.314",
+      "prompt_sha256": "d85c87564c7e66df0c731e3a21ccb725500b34ab6240a9cebfd9a352345086ac",
+      "prompt_utf8_bytes": 1153,
+      "prompt_characters": 721,
+      "response_characters": 4877,
+      "elapsed_seconds": 33.33,
+      "result": "修正版の実装と回帰テストです。\n\n**原因**: `idempotency_key` をループ内で毎回 `uuid.uuid4()` から生成しているため、同一決済のリトライが毎回別キーになります。1回目でサーバー側はコミット済み（C91）なのにクライアントはタイムアウトを受け、2回目は別キーなのでサーバーは新規決済と判断して C92 を再コミットし、二重課金になります。**修正**: キーの生成をループの外に出し、1回の `pay` 呼出しにつき1つのキーを全試行で使い回します。\n\n`payment_client.py`\n\n```python\nimport uuid\n\nMAX_ATTEMPTS = 3\n\n\ndef pay(transport, payload):\n    \"\"\"1つの論理決済を実行する。\n\n    - 同一 pay 呼出し内のリトライでは同一の idempotency_key を使う。\n    - 別の pay 呼出しは別決済なので別のキーになる。\n    - TimeoutError は最大 MAX_ATTEMPTS 回まで試行し、最後の TimeoutError は呼出元へ伝播する。\n    - TimeoutError 以外の例外はリトライせず即座に伝播する。\n    \"\"\"\n    # 1つの論理決済につき1キー。ループの外で一度だけ生成する。\n    idempotency_key = str(uuid.uuid4())\n\n    for attempt in range(1, MAX_ATTEMPTS + 1):\n        try:\n            return transport.charge(payload, idempotency_key=idempotency_key)\n        except TimeoutError:\n            if attempt == MAX_ATTEMPTS:\n                raise\n```\n\n`test_payment_client.py`\n\n```python\nimport uuid\n\nimport pytest\n\nfrom payment_client import MAX_ATTEMPTS, pay\n\n\nclass FakeTransport:\n    \"\"\"charge の呼出しを記録し、あらかじめ指定した結果を順番に返すスタブ。\n\n    outcomes の各要素は、例外インスタンス（送出する）か、それ以外の値（返す）。\n    \"\"\"\n\n    def __init__(self, outcomes):\n        self._outcomes = list(outcomes)\n        self.calls = []  # (payload, idempotency_key) のリスト\n\n    def charge(self, payload, idempotency_key):\n        self.calls.append((payload, idempotency_key))\n        if not self._outcomes:\n            raise AssertionError(\"想定より多く charge が呼ばれました\")\n        outcome = self._outcomes.pop(0)\n        if isinstance(outcome, BaseException):\n            raise outcome\n        return outcome\n\n    @property\n    def keys(self):\n        return [key for _, key in self.calls]\n\n\nPAYLOAD = {\"amount\": 1000, \"currency\": \"JPY\"}\n\n\ndef test_first_attempt_success_calls_once():\n    transport = FakeTransport([\"C1\"])\n\n    assert pay(transport, PAYLOAD) == \"C1\"\n    assert len(transport.calls) == 1\n    assert transport.calls[0][0] == PAYLOAD\n\n\ndef test_retry_after_timeout_reuses_same_key():\n    \"\"\"ログの再現: attempt1 TimeoutError -> attempt2 成功。\n    修正前はキーが a1, b2 と変わり二重課金になるケース。\"\"\"\n    transport = FakeTransport([TimeoutError(), \"C92\"])\n\n    assert pay(transport, PAYLOAD) == \"C92\"\n    assert len(transport.calls) == 2\n    assert len(set(transport.keys)) == 1, (\n        f\"リトライで idempotency_key が変わっています: {transport.keys}\"\n    )\n\n\ndef test_two_timeouts_then_success_reuses_same_key():\n    transport = FakeTransport([TimeoutError(), TimeoutError(), \"C3\"])\n\n    assert pay(transport, PAYLOAD) == \"C3\"\n    assert len(transport.calls) == 3\n    assert len(set(transport.keys)) == 1\n\n\ndef test_all_attempts_timeout_raises_last_timeout_and_stops_at_max():\n    last = TimeoutError(\"last\")\n    transport = FakeTransport([TimeoutError(\"1\"), TimeoutError(\"2\"), last])\n\n    with pytest.raises(TimeoutError) as exc_info:\n        pay(transport, PAYLOAD)\n\n    assert exc_info.value is last\n    assert len(transport.calls) == MAX_ATTEMPTS == 3\n    assert len(set(transport.keys)) == 1\n\n\ndef test_non_timeout_error_propagates_immediately_without_retry():\n    transport = FakeTransport([ValueError(\"declined\"), \"should-not-be-reached\"])\n\n    with pytest.raises(ValueError, match=\"declined\"):\n        pay(transport, PAYLOAD)\n\n    assert len(transport.calls) == 1\n\n\ndef test_non_timeout_error_after_timeout_propagates_immediately():\n    transport = FakeTransport([TimeoutError(), RuntimeError(\"boom\"), \"unreachable\"])\n\n    with pytest.raises(RuntimeError, match=\"boom\"):\n        pay(transport, PAYLOAD)\n\n    assert len(transport.calls) == 2\n    assert len(set(transport.keys)) == 1\n\n\ndef test_separate_pay_calls_use_different_keys():\n    transport = FakeTransport([\"C1\", \"C2\"])\n\n    pay(transport, PAYLOAD)\n    pay(transport, PAYLOAD)\n\n    assert len(transport.calls) == 2\n    assert transport.keys[0] != transport.keys[1]\n\n\ndef test_separate_pay_calls_with_retries_do_not_share_keys():\n    transport = FakeTransport([TimeoutError(), \"C1\", TimeoutError(), \"C2\"])\n\n    assert pay(transport, PAYLOAD) == \"C1\"\n    assert pay(transport, PAYLOAD) == \"C2\"\n\n    first_call_keys = set(transport.keys[:2])\n    second_call_keys = set(transport.keys[2:])\n    assert len(first_call_keys) == 1\n    assert len(second_call_keys) == 1\n    assert first_call_keys.isdisjoint(second_call_keys)\n\n\ndef test_idempotency_key_is_uuid4_string():\n    transport = FakeTransport([\"C1\"])\n\n    pay(transport, PAYLOAD)\n\n    key = transport.keys[0]\n    assert isinstance(key, str)\n    parsed = uuid.UUID(key)\n    assert parsed.version == 4\n    assert str(parsed) == key\n```\n\nテストの要点は次の通りです。\n\n- **二重課金の再現**: `test_retry_after_timeout_reuses_same_key` がログと同じ「タイムアウト後に成功」の流れを再現し、修正前の実装では必ず失敗します。\n- **試行回数の上限**: 3回すべてタイムアウトしたとき、3回目の例外そのものが伝播し、4回目を呼ばないことを確認します。\n- **即時伝播**: `TimeoutError` 以外は1回目でも、タイムアウト後でもリトライしないことを確認します。\n- **決済ごとの独立性**: 別の `pay` 呼出しは、リトライを挟んでも互いに異なるキーになることを確認します。\n\n実行環境がないため、上記コードはこちらでは実行していません。保存後に以下で確認してください。\n\n```\npytest test_payment_client.py -v\n```",
+      "grading": {
+        "method": "human assessment against withheld rubric, not blind; no aggregate uplift score",
+        "observation": "修正版は独立契約5件と生成9件に合格。通常指示でも修正できた。"
+      }
+    },
+    {
+      "case_id": "evidence-retry",
+      "variant": "original",
+      "model": [
+        "claude-fable-5-1"
+      ],
+      "cli_version": "2.1.314",
+      "prompt_sha256": "2a40203fa1d439f4b52092b31b991aec7af1129b06efdac2f6cdb6d8d04af7ee",
+      "prompt_utf8_bytes": 22349,
+      "prompt_characters": 8529,
+      "response_characters": 3803,
+      "elapsed_seconds": 36.8,
+      "result": "修正点は一つです。現行の `pay` は試行ごとに新しい冪等キーを生成しているため、タイムアウト後の再試行がサーバー側では別決済として扱われます。ログの attempt 1 と attempt 2 でキーが a1 と b2 に分かれ、C91 と C92 の二重課金が起きているのはこのためです。キーの生成をループの外に移し、同じ pay 呼出し内の全試行で同一キーを使うようにしました。\n\n前提として、仕様の「TimeoutError を返す」は現行コードの except 節に合わせて「TimeoutError を送出する」と解釈しています。\n\n**修正版 `payment_client.py`**\n\n```python\nimport uuid\n\n\nMAX_ATTEMPTS = 3\n\n\ndef pay(transport, payload):\n    \"\"\"1回の論理決済を実行する。\n\n    - 冪等キーは pay 呼出しごとに1回だけ生成し、内部リトライでは同一キーを再利用する。\n    - TimeoutError は最大 MAX_ATTEMPTS 回まで再試行し、最後の TimeoutError は呼出元へ送出する。\n    - TimeoutError 以外の例外は再試行せず即座に伝播する。\n    \"\"\"\n    idempotency_key = str(uuid.uuid4())\n    for attempt in range(1, MAX_ATTEMPTS + 1):\n        try:\n            return transport.charge(payload, idempotency_key=idempotency_key)\n        except TimeoutError:\n            if attempt == MAX_ATTEMPTS:\n                raise\n```\n\n**回帰テスト `test_payment_client.py`**\n\n```python\nimport uuid\n\nimport pytest\n\nfrom payment_client import MAX_ATTEMPTS, pay\n\n\nclass ScriptedTransport:\n    \"\"\"charge の呼出しを記録し、あらかじめ指定した結果を順に返す偽トランスポート。\n\n    outcomes の各要素は、例外インスタンス（送出する）か、それ以外の値（返す）。\n    \"\"\"\n\n    def __init__(self, outcomes):\n        self._outcomes = list(outcomes)\n        self.calls = []  # (payload, idempotency_key) の履歴\n\n    def charge(self, payload, idempotency_key):\n        self.calls.append((payload, idempotency_key))\n        outcome = self._outcomes.pop(0)\n        if isinstance(outcome, BaseException):\n            raise outcome\n        return outcome\n\n\nPAYLOAD = {\"amount\": 1000, \"currency\": \"JPY\"}\n\n\ndef test_first_attempt_success_calls_once():\n    transport = ScriptedTransport([\"C1\"])\n\n    assert pay(transport, PAYLOAD) == \"C1\"\n    assert len(transport.calls) == 1\n    assert transport.calls[0][0] == PAYLOAD\n\n\ndef test_retry_after_timeout_reuses_same_idempotency_key():\n    # ログの再現: 1回目タイムアウト、2回目成功。\n    # 修正前はキーが a1/b2 のように変わり二重課金になるため、ここで同一キーを要求する。\n    transport = ScriptedTransport([TimeoutError(), \"C91\"])\n\n    assert pay(transport, PAYLOAD) == \"C91\"\n    assert len(transport.calls) == 2\n    keys = [key for _, key in transport.calls]\n    assert keys[0] == keys[1]\n\n\ndef test_all_timeouts_retry_three_times_with_same_key_then_raise():\n    transport = ScriptedTransport([TimeoutError(), TimeoutError(), TimeoutError()])\n\n    with pytest.raises(TimeoutError):\n        pay(transport, PAYLOAD)\n\n    assert len(transport.calls) == MAX_ATTEMPTS == 3\n    keys = {key for _, key in transport.calls}\n    assert len(keys) == 1\n\n\ndef test_last_timeout_is_propagated_to_caller_not_swallowed():\n    last = TimeoutError(\"third\")\n    transport = ScriptedTransport([TimeoutError(\"first\"), TimeoutError(\"second\"), last])\n\n    with pytest.raises(TimeoutError) as excinfo:\n        pay(transport, PAYLOAD)\n\n    assert excinfo.value is last\n\n\ndef test_non_timeout_error_propagates_immediately_without_retry():\n    transport = ScriptedTransport([ValueError(\"declined\"), \"should-not-be-reached\"])\n\n    with pytest.raises(ValueError):\n        pay(transport, PAYLOAD)\n\n    assert len(transport.calls) == 1\n\n\ndef test_separate_pay_calls_use_different_idempotency_keys():\n    transport = ScriptedTransport([\"C1\", \"C2\"])\n\n    pay(transport, PAYLOAD)\n    pay(transport, PAYLOAD)\n\n    assert len(transport.calls) == 2\n    assert transport.calls[0][1] != transport.calls[1][1]\n\n\ndef test_idempotency_key_is_a_uuid_string():\n    transport = ScriptedTransport([\"C1\"])\n\n    pay(transport, PAYLOAD)\n\n    key = transport.calls[0][1]\n    assert isinstance(key, str)\n    uuid.UUID(key)  # 形式不正なら ValueError で失敗する\n```\n\nテストのうち「タイムアウト後の再試行で同一キーを使う」の2件は、修正前のコードでは失敗し、修正後に通過する設計です。他の4件は、最初の一回が成功するケースしかなかった現行テストで未検証だった仕様項目を固定します。実行環境がないため、ここで通過を確認したわけではありません。\n\n残る確認点が二つあります。\n\n- **サーバー側の冪等性** は今回のログでは観測できていません。同一キーで再送した場合にサーバーが既存の課金を返す動作は、サーバーの仕様または実環境で別途確認が必要です。\n- **既に発生した C91 と C92** は、この修正では解消されません。重複分の返金や照合は運用側の対応になります。",
+      "grading": {
+        "method": "human assessment against withheld rubric, not blind; no aggregate uplift score",
+        "observation": "修正版は独立契約5件と生成7件に合格。コード正しさの上積みは観測せず。テスト件数の説明には小さな不整合。"
+      }
+    },
+    {
+      "case_id": "evidence-retry",
+      "variant": "revised",
+      "model": [
+        "claude-fable-5-1"
+      ],
+      "cli_version": "2.1.314",
+      "prompt_sha256": "88ee94c3fb0e2aae2c3394198bc9c9c2b9e4166b7e071f924ba021f3986f333f",
+      "prompt_utf8_bytes": 21492,
+      "prompt_characters": 8484,
+      "response_characters": 5289,
+      "elapsed_seconds": 38.38,
+      "result": "決済クライアントの修正版と回帰テストを示します。実行環境がないため、以下は未実行です。\n\n**原因**: 元の実装は試行ごとに `str(uuid.uuid4())` を生成しています。ログの attempt 1 と attempt 2 でキーが a1 と b2 に変わっているのはこのためです。サーバー側は別キーを別決済として扱うため、1回の pay 呼出しで C91 と C92 の2件が確定しました。キーを pay 呼出しごとに1回だけ生成し、内部リトライで再利用すれば直ります。\n\n**修正版** `payment_client.py`\n\n```python\nimport uuid\n\nMAX_ATTEMPTS = 3\n\n\ndef pay(transport, payload):\n    \"\"\"1回の論理決済を最大3回試行する。\n\n    - 同じ pay 呼出し内のリトライでは同一 idempotency_key を使う。\n    - 別の pay 呼出しは別決済として新しいキーを使う。\n    - TimeoutError 以外の例外は即座に伝播する。\n    - 3回目も TimeoutError なら、その例外を呼出元へ返す。\n    \"\"\"\n    idempotency_key = str(uuid.uuid4())  # 論理決済につき1回だけ生成する\n    for attempt in range(1, MAX_ATTEMPTS + 1):\n        try:\n            return transport.charge(payload, idempotency_key=idempotency_key)\n        except TimeoutError:\n            if attempt == MAX_ATTEMPTS:\n                raise\n    raise AssertionError(\"unreachable\")\n```\n\n**回帰テスト** `test_payment_client.py`\n\n```python\nimport pytest\n\nfrom payment_client import pay\n\n\nclass RecordingTransport:\n    \"\"\"呼出しを記録し、あらかじめ指定した結果を順に返す擬似 transport。\"\"\"\n\n    def __init__(self, outcomes):\n        self._outcomes = list(outcomes)\n        self.calls = []  # (payload, idempotency_key) の履歴\n\n    def charge(self, payload, idempotency_key):\n        self.calls.append((payload, idempotency_key))\n        outcome = self._outcomes.pop(0)\n        if isinstance(outcome, BaseException):\n            raise outcome\n        return outcome\n\n    @property\n    def keys(self):\n        return [key for _, key in self.calls]\n\n\nclass CommittingServerTransport:\n    \"\"\"ログの状況を再現する擬似サーバー。\n\n    決済はサーバー側で確定するが、応答が指定回数だけクライアントに届かず\n    TimeoutError になる。同じキーの再送は確定済みの結果を返す（冪等）。\n    \"\"\"\n\n    def __init__(self, timeouts_before_success):\n        self._remaining_timeouts = timeouts_before_success\n        self.committed = {}  # idempotency_key -> charge_id\n        self.calls = []\n\n    def charge(self, payload, idempotency_key):\n        self.calls.append(idempotency_key)\n        if idempotency_key not in self.committed:\n            self.committed[idempotency_key] = f\"C{len(self.committed) + 91}\"\n        if self._remaining_timeouts > 0:\n            self._remaining_timeouts -= 1\n            raise TimeoutError(\"response lost\")\n        return self.committed[idempotency_key]\n\n\nPAYLOAD = {\"amount\": 1000, \"currency\": \"JPY\"}\n\n\ndef test_first_attempt_success_calls_once():\n    transport = RecordingTransport([\"ok\"])\n    assert pay(transport, PAYLOAD) == \"ok\"\n    assert len(transport.calls) == 1\n    assert transport.calls[0][0] == PAYLOAD\n\n\ndef test_retry_after_timeout_reuses_same_idempotency_key():\n    \"\"\"ログの不具合そのもの。修正前はキーが attempt ごとに変わるため失敗する。\"\"\"\n    transport = RecordingTransport([TimeoutError(), \"ok\"])\n    assert pay(transport, PAYLOAD) == \"ok\"\n    assert len(transport.calls) == 2\n    assert transport.keys[0] == transport.keys[1]\n\n\ndef test_retry_does_not_create_second_charge_on_server():\n    \"\"\"attempt 1 がサーバーで確定しつつクライアントはタイムアウトする状況。\n    修正前は C91 と C92 の2件が確定する。修正後は1件のみ。\"\"\"\n    transport = CommittingServerTransport(timeouts_before_success=1)\n    charge_id = pay(transport, PAYLOAD)\n    assert len(transport.calls) == 2\n    assert len(transport.committed) == 1\n    assert charge_id == \"C91\"\n\n\ndef test_three_timeouts_raise_last_timeout_with_same_key():\n    last = TimeoutError(\"third\")\n    transport = RecordingTransport([TimeoutError(\"first\"), TimeoutError(\"second\"), last])\n    with pytest.raises(TimeoutError) as excinfo:\n        pay(transport, PAYLOAD)\n    assert excinfo.value is last\n    assert len(transport.calls) == 3\n    assert len(set(transport.keys)) == 1\n\n\ndef test_no_fourth_attempt_after_three_timeouts():\n    transport = RecordingTransport([TimeoutError(), TimeoutError(), TimeoutError(), \"ok\"])\n    with pytest.raises(TimeoutError):\n        pay(transport, PAYLOAD)\n    assert len(transport.calls) == 3\n\n\ndef test_non_timeout_error_propagates_immediately():\n    transport = RecordingTransport([ValueError(\"declined\"), \"ok\"])\n    with pytest.raises(ValueError, match=\"declined\"):\n        pay(transport, PAYLOAD)\n    assert len(transport.calls) == 1\n\n\ndef test_separate_pay_calls_use_different_keys():\n    transport = RecordingTransport([\"ok1\", \"ok2\"])\n    assert pay(transport, PAYLOAD) == \"ok1\"\n    assert pay(transport, PAYLOAD) == \"ok2\"\n    assert transport.keys[0] != transport.keys[1]\n\n\ndef test_separate_pay_calls_each_retry_with_their_own_key():\n    transport = RecordingTransport([TimeoutError(), \"ok1\", TimeoutError(), \"ok2\"])\n    assert pay(transport, PAYLOAD) == \"ok1\"\n    assert pay(transport, PAYLOAD) == \"ok2\"\n    first_call_keys = transport.keys[0:2]\n    second_call_keys = transport.keys[2:4]\n    assert len(set(first_call_keys)) == 1\n    assert len(set(second_call_keys)) == 1\n    assert first_call_keys[0] != second_call_keys[0]\n```\n\n**修正前後で期待される結果**\n\n| テスト | 修正前の実装 | 修正後 |\n| --- | --- | --- |\n| retry_reuses_same_idempotency_key | 失敗（キーが異なる） | 成功 |\n| does_not_create_second_charge_on_server | 失敗（確定2件、C92 が返る） | 成功 |\n| three_timeouts_raise_last_timeout_with_same_key | 失敗（キーが3種） | 成功 |\n| separate_pay_calls_each_retry_with_their_own_key | 失敗（呼出し内でキーが変わる） | 成功 |\n| それ以外 | 成功 | 成功 |\n\n実行コマンドは次のとおりです。\n\n```\npytest test_payment_client.py -v\n```\n\n未確認事項として、実際の transport がタイムアウト後の同一キー再送に対して確定済みの結果を返す冪等実装になっているかはコードからは分かりません。サーバー側が同一キーを拒否する仕様なら、2回目の試行は成功ではなく重複エラーとして返るので、その場合の扱いを別途決める必要があります。",
+      "grading": {
+        "method": "human assessment against withheld rubric, not blind; no aggregate uplift score",
+        "observation": "修正版は独立契約5件と生成8件に合格。キー同一性に加え、応答消失後も決済1件という業務結果の生成テストを追加。"
+      }
+    },
+    {
+      "case_id": "evidence-release",
+      "variant": "baseline",
+      "model": [
+        "claude-fable-5-1"
+      ],
+      "cli_version": "2.1.314",
+      "prompt_sha256": "49e88d29cbd84934cf7647a98eb3199cca1c14368020fb8a9ce1fb2b6dff6c90",
+      "prompt_utf8_bytes": 920,
+      "prompt_characters": 454,
+      "response_characters": 788,
+      "elapsed_seconds": 20.33,
+      "result": "結論: 「最新版にすれば直る」とは言えません。\n\n理由は三つです。\n\n- **最新版は候補Bではなく、利用者が使っている artifact A です。** 候補Bは未公開で、変更も検索画面の空配列処理のみです。注文作成とは無関係です。\n- **「解消した」メモは候補Bの検索を検証したものです。** 注文作成の TimeoutError は一度も検証されていません。\n- **サーバーログは別のリクエストです。** 利用者の request_id は r78、ログは r79 です。しかもその r79 も body は ok:false の quota_exceeded で、成功とは言えません。別利用者の成功は、artifact A で注文作成が動くことを示すだけで、この利用者の失敗原因を説明しません。\n\n取引先への文案（送信はしません）:\n\n```\n〇〇様\n\nご連絡いただいた注文作成時のエラー（TimeoutError）について、現在サーバー側の記録と照合して原因を調査しております。\n現時点では、ご利用の版は最新のものであり、更新によって解消する事象ではないと判断しております。\n調査結果と対応方針がまとまり次第、改めてご連絡いたします。\nお手数をおかけしますが、同じ操作を再度お試しいただく際は、発生時刻をお知らせいただけますと幸いです。\n```\n\n今行うべき確認を一つ挙げるなら、**サーバーログで request_id=r78 を検索すること**です。09:45 前後に r78 が到達した記録があるか、あればステータスと body は何かを確認してください。記録がなければリクエストが届いていない（ネットワークや端末側）、あれば応答内容が原因の手がかりになります。r79 の quota_exceeded が同じ利用者のものかどうかも、この照合で分かります。",
+      "grading": {
+        "method": "human assessment against withheld rubric, not blind; no aggregate uplift score",
+        "observation": "更新による解消を肯定しないが、文案で未実施の調査を進行中とし、更新で直らないと逆方向にも断定。"
+      }
+    },
+    {
+      "case_id": "evidence-release",
+      "variant": "original",
+      "model": [
+        "claude-fable-5-1"
+      ],
+      "cli_version": "2.1.314",
+      "prompt_sha256": "04109e7b1635a1bdf0e6371b37137a6867678c55b09df104614a5a9872fb18c3",
+      "prompt_utf8_bytes": 22116,
+      "prompt_characters": 8262,
+      "response_characters": 799,
+      "elapsed_seconds": 17.08,
+      "result": "**結論：言えません。** 根拠は次のとおりです。\n\n- 候補Bの変更は検索画面の空配列処理だけで、報告された症状は注文作成のTimeoutErrorです。修正内容と症状が一致しません。\n- 候補Bは公開していないので、利用者が更新できる「最新版」が存在しません。利用者のartifact Aは現在の本番版で、「古い版を使っている」も誤りです。\n- サーバーログのr79は、端末のr78とは別の要求です。しかも本文はok:false、quota_exceededで、HTTP 200でも業務処理は失敗しています。「サーバーは成功しています」とは言えません。\n- 担当メモの「最新版で解消」は、候補Bの検索を社内検証した結果であり、本件の注文作成には当てはまりません。\n- 別の利用者が同じartifact Aで注文作成に成功しているので、版そのものが原因とは考えにくいです。\n\n**今行うべき確認を一つ**：サーバーログでrequest_id=r78を探し、到達の有無、処理時間、応答内容を確認してください。到達していなければ端末からサーバーまでの経路、到達して遅延していればサーバー側の処理、quota_exceededが出ていればその利用者の上限設定へと、次の調査先が分かれます。\n\n**取引先向け文案（送信はしていません）**\n\n> ご報告いただいた注文作成時のタイムアウトについて、現在サーバー側の記録を確認しております。\n> 本件はアプリの更新で解消する内容とは現時点で判断できておりませんので、更新のご案内は控えさせていただきます。\n> 発生時刻（09:45頃）と操作内容は把握しております。確認結果が分かり次第、原因と対応をご連絡いたします。\n> ご不便をおかけし申し訳ございません。\n\n担当者案は、別要求の応答を本件の成功と読み替え、未公開の修正を更新案内にしている点で送れません。",
+      "grading": {
+        "method": "human assessment against withheld rubric, not blind; no aggregate uplift score",
+        "observation": "更新効果の未確定は保持。文案で現在確認中と未実施行為を補完。"
+      }
+    },
+    {
+      "case_id": "evidence-release",
+      "variant": "revised",
+      "model": [
+        "claude-fable-5-1"
+      ],
+      "cli_version": "2.1.314",
+      "prompt_sha256": "b745df5c85bf5b3ce745f02d87762b934c38f84e4cf221baf4f3ed00dc5edf3f",
+      "prompt_utf8_bytes": 21259,
+      "prompt_characters": 8217,
+      "response_characters": 803,
+      "elapsed_seconds": 22.27,
+      "result": "結論: 「最新版にすれば直る」とは言えません。候補Bは注文作成に触れておらず公開もされていないため、利用者に更新先がありません。\n\n根拠は次の三点です。\n\n- **担当メモの対象が違う。** 「最新版で解消」は候補Bの検索機能を社内検証した結果です。今回の症状は配布中のartifact Aでの注文作成です。\n- **サーバーログは同じ要求ではない。** 端末の失敗はrequest_id r78、ログはr79です。別要求なので、r78の結果は未確認です。r79自体も本文がquota_exceededで業務上は失敗しており、「サーバーは成功」とは言えません。\n- **古い版が原因とは言えない。** artifact Aは現在の唯一の配布版で、別の利用者は同じ版で注文作成に成功しています。版の違いは症状を説明しません。\n\n取引先向け文案（短縮版）:\n\n```text\n○○様\n\n本日9:45頃の注文作成でタイムアウトが発生した件、ご連絡ありがとうございます。\n現在ご利用の版が最新であり、現時点でお客様側での更新は不要です。\n該当操作のサーバー側記録を確認のうえ、原因と対応を改めてご連絡いたします。\nご不便をおかけし申し訳ありません。\n```\n\n「確認のうえ」は行動の約束なので、送る前に下の確認へ着手してください。\n\n今行う確認は一つ、サーバーログでrequest_id=r78を検索することです。結果で次が分かれます。\n\n- **r78が存在しない**なら、要求がサーバーに届いていないか応答前に切れています。経路や所要時間の調査に進みます。\n- **r78がquota_exceededなど業務エラー**なら、その利用者の上限設定を調べます。版の更新は関係しません。\n- **r78がok:trueで応答済み**なら、注文は作成済みの可能性があり、端末への応答到達と重複作成の有無を確認します。",
+      "grading": {
+        "method": "human assessment against withheld rubric, not blind; no aggregate uplift score",
+        "observation": "未実施の調査を現在進行形で書かなくなった。ログ不在の解釈は狭く、ログ欠落を考慮していない。"
+      }
+    },
+    {
+      "case_id": "evidence-release",
+      "variant": "revised-v2",
+      "model": [
+        "claude-fable-5-1"
+      ],
+      "cli_version": "2.1.314",
+      "prompt_sha256": "726e0c7728c1f6048784a52a26564614e656b6e025576e82f6f1dccd139a5fc9",
+      "prompt_utf8_bytes": 21468,
+      "prompt_characters": 8290,
+      "response_characters": 697,
+      "elapsed_seconds": 16.47,
+      "result": "**結論：言えません。** 根拠は三点です。\n\n- 担当メモが「解消」と確認したのは候補Bの検索画面で、利用者が失敗したのは注文作成です。対象の操作が違います。\n- 候補Bは未公開なので、利用者は更新できません。全利用者が artifact A を使っており、「古い版」ではありません。\n- 「サーバーは成功」の根拠にされた request_id=r79 は、利用者の r78 とは別の要求です。しかも本文は quota_exceeded の業務エラーで、HTTP 200 でも成功ではありません。\n\n**取引先向け文案（未送信）**\n\n```text\nご報告いただいた注文作成時のタイムアウト（request_id: r78）について、現在サーバー側の記録を確認しています。\n現時点では原因を特定できておらず、アプリの更新で解消するとは判断していません。更新のご案内は確認後に改めてご連絡します。\n確認結果が出次第、ご連絡いたします。\n```\n\n**今行うべき確認を一つ**\n\nサーバーログで request_id=r78 を検索し、受信の有無、HTTPステータス、本文を確認します。\n\n- 記録がなければ、要求がサーバーに届く前か応答を受け取る前に端末側で切れた可能性が残ります。\n- 記録があり本文がエラーなら、その内容（例えば quota_exceeded）がこの利用者固有の原因になります。別の利用者が同じ版で成功している事実とも整合します。\n\nいずれの結果でも、候補Bの検索画面の変更が注文作成の失敗を直す根拠はないため、担当者案の「最新版へ更新してください」は送らないでください。",
+      "grading": {
+        "method": "human assessment against withheld rubric, not blind; no aggregate uplift score",
+        "observation": "現在確認中という未実施行為の補完が再発。全利用者がAという観測範囲の拡張も発生。安定した防止は実証できない。"
+      }
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "supplied_bug": {
+    "withheld_contract_passed": 2,
+    "withheld_contract_failed": 3
+  },
+  "baseline": {
+    "withheld_contract_passed": 5,
+    "generated_passed": 9
+  },
+  "original": {
+    "withheld_contract_passed": 5,
+    "generated_passed": 7
+  },
+  "revised": {
+    "withheld_contract_passed": 5,
+    "generated_passed": 8
+  },
+  "note": "Outputs were inspected before execution. All revised generated code tests exited zero. Counts are not a quality ranking."
+}
